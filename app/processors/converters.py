@@ -92,7 +92,7 @@ class PolkascanHarvesterService(BaseService):
 
             # Get accounts from storage keys
             storage_key_prefix = self.substrate.generate_storage_hash(
-                storage_module='System',
+                storage_module='Did',
                 storage_function='Account',
                 metadata_version=settings.SUBSTRATE_METADATA_VERSION
             )
@@ -189,7 +189,10 @@ class PolkascanHarvesterService(BaseService):
             ).get('result')
 
             account_audit = AccountAudit(
-                account_id=sudo_key.replace('0x', ''),
+                # account_id=sudo_key.replace('0x', ''),
+                # Added for testing purpose
+                # TODO: Remove hard-coding
+                account_id='6469643a737369643a73776e0000000000000000000000000000000000000000',
                 block_id=block.id,
                 extrinsic_idx=None,
                 event_idx=None,
@@ -1017,7 +1020,7 @@ class PolkascanHarvesterService(BaseService):
 
         # Determine if keys have Blake2_128Concat format so AccountId is stored in storage key
         storage_method = self.substrate.get_metadata_storage_function(
-            module_name="System",
+            module_name="Did",
             storage_name="Account",
             block_hash=block_hash
         )
@@ -1027,7 +1030,7 @@ class PolkascanHarvesterService(BaseService):
 
                 # get balances storage prefix
                 storage_key_prefix = self.substrate.generate_storage_hash(
-                    storage_module='System',
+                    storage_module='Did',
                     storage_function='Account',
                     metadata_version=settings.SUBSTRATE_METADATA_VERSION
                 )
@@ -1054,7 +1057,7 @@ class PolkascanHarvesterService(BaseService):
         # Get balance for account
         try:
             account_info_data = self.substrate.get_runtime_state(
-                module='System',
+                module='Did',
                 storage_function='Account',
                 params=['0x{}'.format(account_id)],
                 block_hash=block_hash
@@ -1107,7 +1110,7 @@ class PolkascanHarvesterService(BaseService):
                     ) as b
                     on a.account_id = b.account_id and a.block_id = b.max_block_id
                     """)
-
+        
         for account_id, balance_total, balance_free, balance_reserved, nonce in account_info:
             Account.query(self.db_session).filter_by(id=account_id).update(
                 {
@@ -1117,6 +1120,7 @@ class PolkascanHarvesterService(BaseService):
                     Account.nonce: nonce,
                 }, synchronize_session='fetch'
             )
+       
 
 
 
