@@ -188,7 +188,9 @@ class AccountBlockProcessor(BlockProcessor):
 
                 account = Account(
                     id=account_audit.account_id,
-                    address=ss58_encode(account_audit.account_id, settings.SUBSTRATE_ADDRESS_TYPE),
+                    # Since we want to store the Did instead of ss58 address
+                    address=bytearray.fromhex(account_audit.account_id.replace('0x','')).decode(),
+                    # address=ss58_encode(account_audit.account_id, settings.SUBSTRATE_ADDRESS_TYPE),
                     hash_blake2b=blake2_256(binascii.unhexlify(account_audit.account_id)),
                     is_treasury=(account_audit.data or {}).get('is_treasury', False),
                     is_sudo=(account_audit.data or {}).get('is_sudo', False),
@@ -207,7 +209,7 @@ class AccountBlockProcessor(BlockProcessor):
                 # Retrieve and set initial balance
                 try:
                     account_info_data = self.substrate.get_runtime_state(
-                        module='System',
+                        module='Did',
                         storage_function='Account',
                         params=['0x{}'.format(account.id)],
                         block_hash=self.block.hash
@@ -240,7 +242,9 @@ class AccountBlockProcessor(BlockProcessor):
 
             account = Account(
                 id=search_index.account_id,
-                address=ss58_encode(search_index.account_id, settings.SUBSTRATE_ADDRESS_TYPE),
+                # Since we want to store the DID instead of ss58 accountid
+                address=bytearray.fromhex(search_index.account_id.replace('0x','')).decode(),
+                # address=ss58_encode(search_index.account_id, settings.SUBSTRATE_ADDRESS_TYPE),
                 hash_blake2b=blake2_256(binascii.unhexlify(search_index.account_id)),
                 created_at_block=self.block.id,
                 updated_at_block=self.block.id
@@ -248,7 +252,7 @@ class AccountBlockProcessor(BlockProcessor):
 
             try:
                 account_info_data = self.substrate.get_runtime_state(
-                    module='System',
+                    module='Did',
                     storage_function='Account',
                     params=['0x{}'.format(account.id)],
                     block_hash=self.block.hash
@@ -288,10 +292,12 @@ class AccountIndexBlockProcessor(BlockProcessor):
                     )
 
                 account_index.account_id = account_index_audit.account_id
-                account_index.short_address = ss58_encode_account_index(
-                    account_index_audit.account_index_id,
-                    settings.SUBSTRATE_ADDRESS_TYPE
-                )
+                # Create index with Did
+                address=bytearray.fromhex(account_index_audit.account_index_id.replace('0x','')).decode(),
+                # account_index.short_address = ss58_encode_account_index(
+                #     account_index_audit.account_index_id,
+                #     settings.SUBSTRATE_ADDRESS_TYPE
+                # )
                 account_index.updated_at_block = self.block.id
 
                 account_index.save(db_session)
