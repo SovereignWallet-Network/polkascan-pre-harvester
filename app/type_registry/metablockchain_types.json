@@ -25,7 +25,9 @@
           [ "beneficiary", "Did" ],
           [ "bond", "Balance" ]
         ]
-      }
+      },
+      "CurrencyId": "i64",
+      "Amount": "i64"
     },
   "versioning": [
   ]
