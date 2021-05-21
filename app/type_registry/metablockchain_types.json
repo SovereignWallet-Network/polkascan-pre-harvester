@@ -27,7 +27,8 @@
         ]
       },
       "CurrencyId": "i64",
-      "Amount": "i64"
+      "Amount": "i64",
+      "Memo": "Vec<u8>"
     },
   "versioning": [
   ]
